@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>影子配对游戏</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B8B',
+            success: '#4CAF50', // 正确的绿色
+            error: '#F44336',   // 错误的红色
+          },
+          fontFamily: {
+            cute: ['"Comic Sans MS"', 'cursive'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .item-hover {
+        transition: transform 0.2s ease;
+      }
+      .item-hover:hover {
+        transform: scale(1.05);
+      }
+      .correct-pulse {
+        animation: correct 0.6s ease-in-out;
+      }
+      .wrong-shake {
+        animation: wrong 0.5s ease-in-out;
+      }
+      .center-animation {
+        animation: centerScale 5s ease-in-out forwards;
+      }
+      .confetti {
+        position: fixed;
+        pointer-events: none;
+        z-index: 50;
+      }
+      @keyframes correct {
+        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+      }
+      @keyframes wrong {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+      }
+      @keyframes centerScale {
+        0% { 
+          transform: scale(1);
+          position: static;
+          z-index: 10;
+        }
+        30% { 
+          transform: scale(3);
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          z-index: 100;
+          translate: -50% -50%;
+        }
+        70% { 
+          transform: scale(3);
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          z-index: 100;
+          translate: -50% -50%;
+        }
+        100% { 
+          transform: scale(1);
+          position: static;
+          z-index: 10;
+        }
+      }
+      @keyframes fall {
+        0% {
+          transform: translateY(-10px) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-yellow-100 to-blue-100 min-h-screen font-cute">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <header class="text-center mb-8">
+      <h1 class="text-[clamp(1.8rem,5vw,3rem)] font-bold text-primary mb-3">
+        <i class="fa fa-picture-o mr-2"></i>影子配对小游戏
+      </h1>
+      <p class="text-gray-600 text-lg">拖动物品到对应的影子上，或者拖动影子到对应的物品上</p>
+    </header>
+
+    <!-- 得分区域 -->
+    <div class="flex justify-center mb-6">
+      <div class="bg-white rounded-full px-6 py-2 shadow-md flex items-center">
+        <i class="fa fa-star text-yellow-400 text-xl mr-2"></i>
+        <span class="text-gray-700 font-bold" id="score">得分: 0</span>
+      </div>
+    </div>
+
+    <!-- 主题选择 -->
+    <div class="flex flex-wrap justify-center gap-3 mb-8">
+      <button class="theme-btn bg-primary text-white px-5 py-2 rounded-full shadow-md item-hover active" data-theme="animals">
+        <i class="fa fa-paw mr-1"></i>动物
+      </button>
+      <button class="theme-btn bg-blue-500 text-white px-5 py-2 rounded-full shadow-md item-hover" data-theme="car">
+        <i class="fa fa-car mr-1"></i>汽车
+      </button>
+      <button class="theme-btn bg-green-500 text-white px-5 py-2 rounded-full shadow-md item-hover" data-theme="food">
+        <i class="fa fa-cutlery mr-1"></i>食物
+      </button>
+      <button class="theme-btn bg-purple-500 text-white px-5 py-2 rounded-full shadow-md item-hover" data-theme="live">
+        <i class="fa fa-home mr-1"></i>生活用品
+      </button>
+    </div>
+
+    <!-- 游戏区域 -->
+    <div class="bg-white rounded-2xl p-5 shadow-lg">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 物品区域 -->
+        <div>
+          <h2 class="text-center text-xl font-bold text-primary mb-4" id="items-title">
+            <i class="fa fa-object-group mr-2"></i>物品
+          </h2>
+          <div class="grid grid-cols-3 gap-4" id="items-container"></div>
+        </div>
+
+        <!-- 影子区域 -->
+        <div>
+          <h2 class="text-center text-xl font-bold text-gray-700 mb-4" id="shadows-title">
+            <i class="fa fa-moon-o mr-2"></i>影子
+          </h2>
+          <div class="grid grid-cols-3 gap-4" id="shadows-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden" id="success-modal">
+      <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center shadow-2xl">
+        <div class="text-yellow-500 text-5xl mb-4">
+          <i class="fa fa-trophy"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-primary mb-2">恭喜你！</h2>
+        <p class="text-gray-600 mb-6" id="success-text">完成了所有配对挑战！</p>
+        <button class="bg-primary text-white px-6 py-3 rounded-full font-bold shadow-md item-hover" id="restart-btn">
+          再来一次 <i class="fa fa-refresh ml-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 游戏核心数据
+    const gameConfig = {
+      animals: {
+        itemFolder: "animals photos",         // 物品文件夹名（带空格）
+        shadowFolder: "shadow photos animals", // 影子文件夹名（带空格）
+        totalItems: 9,                         // 9个物品/影子
+        itemNames: ["大象", "考拉", "长颈鹿", "小熊", "黄牛", "兔子", "梅花鹿", "老虎", "老鼠"],
+        filePrefix: "animals"                  // 文件名前缀（animals1.png）
+      },
+      car: {
+        itemFolder: "car photos",
+        shadowFolder: "shadow photos car",
+        totalItems: 9,
+        itemNames: ["翻斗车", "警车", "校车", "冷链车", "拖车", "搅拌车", "公交汽车", "叉车", "吊机"],
+        filePrefix: ""                         // 文件名无前缀（1.png）
+      },
+      food: {
+        itemFolder: "food photos",
+        shadowFolder: "shadow photos food",
+        totalItems: 9,
+        itemNames: ["茄子", "菠萝", "西瓜", "胡萝卜", "草莓", "苹果", "辣椒", "樱桃", "香菇"],
+        filePrefix: ""
+      },
+      live: {
+        itemFolder: "live photos",
+        shadowFolder: "shadow photos live",
+        totalItems: 9,
+        itemNames: ["电话", "洗手液", "剪刀", "叉子", "帽子", "照相机", "手套", "袜子", "帽子"],
+        filePrefix: ""
+      }
+    };
+
+    // 全局变量
+    let currentTheme = "animals";
+    let score = 0;
+    let matchedCount = 0;
+    let isAnimating = false; // 控制动画期间不能操作
+
+    // DOM元素
+    const itemsContainer = document.getElementById("items-container");
+    const shadowsContainer = document.getElementById("shadows-container");
+    const scoreElement = document.getElementById("score");
+    const themeButtons = document.querySelectorAll(".theme-btn");
+    const successModal = document.getElementById("success-modal");
+    const successText = document.getElementById("success-text");
+    const restartBtn = document.getElementById("restart-btn");
+    const itemsTitle = document.getElementById("items-title");
+    const shadowsTitle = document.getElementById("shadows-title");
+
+    // 创建彩带/小花粒子效果
+    function createFallingEffect(element, type = 'confetti') {
+      // 清除现有粒子
+      document.querySelectorAll('.confetti').forEach(el => el.remove());
+      
+      const rect = element.getBoundingClientRect();
+      const startX = rect.left + rect.width / 2;
+      const startY = rect.top;
+      
+      // 生成更多粒子，扩大范围
+      const particleCount = 80;
+      
+      // 颜色集合
+      const colors = [
+        '#FF6B8B', '#4CAF50', '#2196F3', '#FFC107', 
+        '#9C27B0', '#FF9800', '#F44336', '#00BCD4'
+      ];
+      
+      // 花的emoji集合
+      const flowers = ['🌸', '🌼', '💐', '🌻', '🌹', '🌷', '🌺'];
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('confetti');
+        
+        // 根据类型设置粒子内容和样式
+        if (type === 'flower') {
+          particle.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+          particle.style.fontSize = `${Math.random() * 16 + 12}px`;
+        } else {
+          particle.style.width = `${Math.random() * 10 + 5}px`;
+          particle.style.height = `${Math.random() * 10 + 5}px`;
+          particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        }
+        
+        // 扩大随机范围，让粒子分布更分散
+        particle.style.left = `${startX + (Math.random() * 300 - 150)}px`;
+        particle.style.top = `${startY}px`;
+        // 调整动画时间为2秒左右
+        particle.style.animation = `fall ${Math.random() * 1 + 1.5}s linear forwards`;
+        particle.style.animationDelay = `${Math.random() * 0.5}s`;
+        particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+        particle.style.opacity = Math.random() * 0.8 + 0.2;
+        
+        document.body.appendChild(particle);
+      }
+      
+      // 动画结束后清理（比动画时间多0.5秒）
+      setTimeout(() => {
+        document.querySelectorAll('.confetti').forEach(el => el.remove());
+      }, 2500);
+    }
+
+    // 触发掉落效果（根据匹配次数交替）
+    function triggerAlternatingEffects() {
+      // 根据匹配次数决定效果类型：奇数次用彩带，偶数次用小花
+      const effectType = matchedCount % 2 === 1 ? 'confetti' : 'flower';
+      
+      // 同时从物品标题和影子标题掉落相同效果
+      createFallingEffect(itemsTitle, effectType);
+      createFallingEffect(shadowsTitle, effectType);
+    }
+
+    // 初始化游戏
+    function initGame(theme) {
+      currentTheme = theme;
+      score = 0;
+      matchedCount = 0;
+      isAnimating = false;
+      const config = gameConfig[theme];
+      
+      // 更新UI
+      scoreElement.textContent = `得分: ${score}`;
+      itemsContainer.innerHTML = "";
+      shadowsContainer.innerHTML = "";
+      successModal.classList.add("hidden");
+      
+      // 清除现有粒子
+      document.querySelectorAll('.confetti').forEach(el => el.remove());
+
+      // 生成物品（1-9）
+      for (let i = 1; i <= config.totalItems; i++) {
+        // 构建文件名
+        const fileName = config.filePrefix ? `${config.filePrefix}${i}.png` : `${i}.png`;
+        // 处理路径中的空格（转为%20）
+        const encodedItemFolder = encodeURIComponent(config.itemFolder);
+        const itemPath = `images/${encodedItemFolder}/${fileName}`;
+
+        const itemEl = document.createElement("div");
+        itemEl.className = "bg-white rounded-lg p-3 shadow border border-gray-100 flex flex-col items-center justify-center item-hover cursor-move";
+        itemEl.draggable = true;
+        // 存储关键信息：类型、文件名（用于匹配）
+        itemEl.dataset.type = "item";
+        itemEl.dataset.filename = fileName;
+        itemEl.dataset.index = i; // 存储索引用于获取名称
+
+        itemEl.innerHTML = `
+          <img src="${itemPath}" alt="${config.itemNames[i-1]}" class="w-20 h-20 object-contain mb-2">
+          <span class="text-sm text-gray-700">${config.itemNames[i-1]}</span>
+        `;
+
+        // 绑定拖拽事件
+        itemEl.addEventListener("dragstart", handleDragStart);
+        itemEl.addEventListener("dragend", handleDragEnd);
+        itemsContainer.appendChild(itemEl);
+      }
+
+      // 生成影子（1-9，随机排序）
+      const shuffledIndices = Array.from({length: config.totalItems}, (_, i) => i + 1)
+        .sort(() => Math.random() - 0.5); // 随机打乱顺序
+
+      shuffledIndices.forEach(i => {
+        const fileName = config.filePrefix ? `${config.filePrefix}${i}.png` : `${i}.png`;
+        const encodedShadowFolder = encodeURIComponent(config.shadowFolder);
+        const shadowPath = `images/${encodedShadowFolder}/${fileName}`;
+
+        const shadowEl = document.createElement("div");
+        shadowEl.className = "bg-gray-100 rounded-lg p-3 shadow-inner flex flex-col items-center justify-center min-h-[120px] item-hover cursor-move";
+        shadowEl.draggable = true;
+        shadowEl.dataset.type = "shadow";
+        shadowEl.dataset.filename = fileName;
+        shadowEl.dataset.index = i; // 存储索引用于获取名称
+
+        shadowEl.innerHTML = `
+          <img src="${shadowPath}" alt="${config.itemNames[i-1]}的影子" class="w-20 h-20 object-contain mb-2 grayscale opacity-70">
+          <span class="text-sm text-gray-500">?</span>
+        `;
+
+        // 绑定拖拽和放置事件
+        shadowEl.addEventListener("dragstart", handleDragStart);
+        shadowEl.addEventListener("dragend", handleDragEnd);
+        shadowEl.addEventListener("dragover", handleDragOver);
+        shadowEl.addEventListener("drop", handleDrop);
+        shadowsContainer.appendChild(shadowEl);
+      });
+
+      // 给物品添加放置事件（支持影子拖到物品上）
+      document.querySelectorAll('[data-type="item"]').forEach(item => {
+        item.addEventListener("dragover", handleDragOver);
+        item.addEventListener("drop", handleDrop);
+      });
+    }
+
+    // 拖拽开始：记录被拖拽元素的信息（类型+文件名）
+    function handleDragStart(e) {
+      if (isAnimating) {
+        e.preventDefault();
+        return;
+      }
+      
+      const dragInfo = {
+        type: this.dataset.type,       // "item" 或 "shadow"
+        filename: this.dataset.filename, // 核心匹配依据：文件名（如animals1.png）
+        index: this.dataset.index // 记录索引用于获取名称
+      };
+      e.dataTransfer.setData("text/plain", JSON.stringify(dragInfo));
+      // 拖拽时添加半透明效果
+      setTimeout(() => this.classList.add("opacity-50"), 0);
+    }
+
+    // 拖拽结束：清除样式
+    function handleDragEnd() {
+      this.classList.remove("opacity-50");
+    }
+
+    // 拖拽经过：允许放置
+    function handleDragOver(e) {
+      if (isAnimating) {
+        e.preventDefault();
+        return;
+      }
+      
+      e.preventDefault(); // 必须调用，否则无法触发drop事件
+      this.classList.add("ring-2", "ring-dashed", "ring-gray-300");
+    }
+
+    // 放置处理：核心匹配逻辑
+    function handleDrop(e) {
+      if (isAnimating) {
+        e.preventDefault();
+        return;
+      }
+      
+      e.preventDefault();
+      this.classList.remove("ring-2", "ring-dashed", "ring-gray-300");
+
+      // 1. 获取拖拽元素的信息
+      const dragInfo = JSON.parse(e.dataTransfer.getData("text/plain"));
+      // 2. 获取目标元素的信息
+      const targetType = this.dataset.type;
+      const targetFilename = this.dataset.filename;
+      const targetIndex = this.dataset.index;
+
+      // 核心判断条件：
+      // - 文件名必须完全相同
+      // - 类型必须不同（一个是item，一个是shadow）
+      const isMatched = dragInfo.filename === targetFilename && 
+                       dragInfo.type !== targetType;
+
+      if (isMatched) {
+        isAnimating = true; // 开始动画，禁止操作
+        
+        // 先增加匹配计数，用于决定特效类型
+        matchedCount++;
+        
+        // 触发掉落效果
+        triggerAlternatingEffects();
+        
+        // 获取物品名称和图片路径
+        const config = gameConfig[currentTheme];
+        const itemName = config.itemNames[targetIndex - 1];
+        const encodedItemFolder = encodeURIComponent(config.itemFolder);
+        const itemPath = `images/${encodedItemFolder}/${targetFilename}`;
+        
+        // 确定影子元素和物品元素
+        let shadowEl, itemEl;
+        if (targetType === "shadow") {
+          shadowEl = this;
+          itemEl = document.querySelector(`[data-type="item"][data-filename="${targetFilename}"]`);
+        } else {
+          itemEl = this;
+          shadowEl = document.querySelector(`[data-type="shadow"][data-filename="${targetFilename}"]`);
+        }
+        
+        // 1. 用物品图片替换影子图片
+        const shadowImg = shadowEl.querySelector("img");
+        shadowImg.src = itemPath;
+        shadowImg.alt = itemName;
+        shadowImg.classList.remove("grayscale", "opacity-70");
+        
+        // 2. 更新影子区域的文本
+        const shadowText = shadowEl.querySelector("span");
+        shadowText.textContent = itemName;
+        shadowText.classList.remove("text-gray-500");
+        shadowText.classList.add("text-gray-700", "font-bold");
+        
+        // 3. 标记正确状态
+        shadowEl.classList.add("bg-success/20", "border", "border-success", "correct-pulse", "pointer-events-none");
+        
+        // 4. 移除物品栏的照片
+        if (itemEl && itemEl.parentNode) {
+          // 先保存物品图片的引用，用于动画
+          const itemImg = itemEl.querySelector("img").cloneNode(true);
+          itemImg.classList.add("center-animation");
+          document.body.appendChild(itemImg);
+          
+          // 移除物品元素
+          itemEl.remove();
+        }
+        
+        // 5. 等待动画完成后继续（2秒，与粒子效果同步）
+        setTimeout(() => {
+          // 移除动画元素
+          const animatingImg = document.querySelector(".center-animation");
+          if (animatingImg && animatingImg.parentNode) {
+            animatingImg.remove();
+          }
+          
+          // 更新得分
+          score += 10;
+          scoreElement.textContent = `得分: ${score}`;
+          isAnimating = false;
+
+          // 检查是否完成所有配对
+          if (matchedCount === gameConfig[currentTheme].totalItems) {
+            setTimeout(() => {
+              successText.textContent = `你获得了${score}分，成功完成了所有配对！`;
+              successModal.classList.remove("hidden");
+            }, 500);
+          }
+        }, 2000); // 等待2秒动画完成
+      } else {
+        // 配对错误：显示红色
+        this.classList.add("bg-error/20", "border", "border-error", "wrong-shake");
+        // 1秒后移除错误样式
+        setTimeout(() => {
+          this.classList.remove("bg-error/20", "border", "border-error", "wrong-shake");
+        }, 1000);
+      }
+    }
+
+    // 主题切换事件
+    themeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (isAnimating) return;
+        
+        themeButtons.forEach(b => b.classList.remove("active", "ring-2", "ring-offset-2", "ring-primary"));
+        btn.classList.add("active", "ring-2", "ring-offset-2", "ring-primary");
+        initGame(btn.dataset.theme);
+      });
+    });
+
+    // 重新开始游戏
+    restartBtn.addEventListener("click", () => {
+      initGame(currentTheme);
+    });
+
+    // 初始加载动物主题
+    window.addEventListener("DOMContentLoaded", () => {
+      initGame("animals");
+    });
+  </script>
+</body>
+</html>
