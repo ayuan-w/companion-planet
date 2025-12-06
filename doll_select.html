@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>选择你的玩偶</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background: url('./textures/planet.jpg') no-repeat center center/cover;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 40px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* 居中容器 */
+        .carousel-container {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 520px;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 60px;
+            transition: transform 1.1s cubic-bezier(0.25,0.46,0.45,0.94);
+            padding: 0 200px;
+            align-items: center;
+            height: 100%;
+            will-change: transform;
+        }
+
+        /* 卡片样式 */
+        .card {
+            width: 330px;
+            height: 440px;
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(15px);
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 25px 45px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.15);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 选中状态 */
+        .card.active {
+            transform: scale(1.25);
+            z-index: 10;
+            box-shadow: 0 30px 60px rgba(138, 43, 226, 0.4), 0 0 30px rgba(160, 255, 255, 0.3);
+        }
+
+        /* 图片容器 */
+        .card-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 图片样式 */
+        .card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.8s ease;
+        }
+
+        .card.active img {
+            transform: scale(1.15);
+        }
+
+        /* 左右按钮 */
+        .btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 50px;
+            color: white;
+            cursor: pointer;
+            padding: 20px;
+            user-select: none;
+            z-index: 20;
+            background: rgba(0,0,0,0.35);
+            border-radius: 50%;
+            width: 75px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(0,0,0,0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
+        }
+
+        #leftBtn { left: 40px; }
+        #rightBtn { right: 40px; }
+
+        /* 选择玩偶按钮 */
+        .select-btn {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #8a6bc9, #5a8de6);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(138, 107, 201, 0.4);
+            z-index: 30;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .select-btn:hover {
+            transform: translateX(-50%) translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(138, 107, 201, 0.6);
+        }
+
+        /* 定制弹窗 */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .custom-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 850px;
+            height: 700px;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+            animation: modalAppear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.8) translateY(50px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .modal-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧图片区域 */
+        .modal-left {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            min-width: 350px;
+            background: rgba(255,255,255,0.05);
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* 弹窗中的图片样式 - 限制尺寸 */
+        .modal-image {
+            width: 100%;
+            height: 100%;
+            max-width: 350px;
+            max-height: 450px;
+            object-fit: contain;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: block;
+            margin: auto;
+        }
+
+        /* 右侧表单区域 */
+        .modal-right {
+            flex: 1;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* 自定义滚动条 */
+        .modal-right::-webkit-scrollbar { width: 6px; }
+        .modal-right::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .modal-right::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; color: rgba(255,255,255,0.9); margin-bottom: 8px; font-weight: 600; }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            box-sizing: border-box;
+        }
+        
+        .form-select option { background: #333; color: white; }
+        .form-textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: rgba(138, 107, 201, 0.8); background: rgba(255,255,255,0.15); }
+        .form-input::placeholder, .form-textarea::placeholder { color: rgba(255,255,255,0.6); }
+
+        .modal-footer {
+            padding: 20px 40px 30px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .modal-buttons { display: flex; gap: 15px; }
+        .btn-cancel, .btn-confirm {
+            flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); border: 2px solid rgba(255,255,255,0.3); }
+        .btn-cancel:hover { background: rgba(255,255,255,0.2); }
+        .btn-confirm { background: linear-gradient(45deg, rgba(138, 107, 201, 0.8), rgba(90, 141, 230, 0.8)); color: white; border: 2px solid rgba(138, 107, 201, 0.5); }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(138, 107, 201, 0.4); }
+
+        .close-btn {
+            position: absolute; top: 20px; right: 20px; font-size: 30px; color: rgba(255,255,255,0.8); cursor: pointer;
+            background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .close-btn:hover { background: rgba(138, 107, 201, 0.8); color: white; transform: rotate(90deg); }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>选择你的玩偶</h1>
+        <p>Select your favorite companion</p>
+    </div>
+
+    <div id="leftBtn" class="btn">❮</div>
+    <div id="rightBtn" class="btn">❯</div>
+
+    <button class="select-btn" id="selectBtn">选择这个玩偶</button>
+
+    <div class="carousel-container" id="carouselContainer">
+        <div class="carousel-track" id="track">
+            <div class="card active" data-index="0">
+                <div class="card-image"><img src="textures/cover_doll.jpg" alt="玩偶1"></div>
+            </div>
+            <div class="card" data-index="1">
+                <div class="card-image"><img src="textures/cover_doll1.jpg" alt="玩偶2"></div>
+            </div>
+            <div class="card" data-index="2">
+                <div class="card-image"><img src="textures/cover_doll2.jpg" alt="玩偶3"></div>
+            </div>
+            <div class="card" data-index="3">
+                <div class="card-image"><img src="textures/cover_doll3.jpg" alt="玩偶4"></div>
+            </div>
+            <div class="card" data-index="4">
+                <div class="card-image"><img src="textures/cover_doll4.jpg" alt="玩偶5"></div>
+            </div>
+            <div class="card" data-index="5">
+                <div class="card-image"><img src="textures/cover_doll5.jpg" alt="玩偶6"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="customModal">
+        <div class="modal-content">
+            <div class="close-btn" id="closeBtn">×</div>
+            
+            <div class="modal-header">
+                <h2 class="modal-title">定制你的玩偶</h2>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-left">
+                    <img src="" alt="选中的玩偶" id="modalImage" class="modal-image">
+                </div>
+                
+                <div class="modal-right">
+                    <div class="form-group">
+                        <label class="form-label">玩偶名字</label>
+                        <input type="text" class="form-input" id="dollName" placeholder="给你的玩偶起个可爱的名字">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">性格设定</label>
+                        <select class="form-select" id="dollPersonality">
+                            <option value="">选择性格</option>
+                            <option value="温柔体贴">温柔体贴</option>
+                            <option value="活泼开朗">活泼开朗</option>
+                            <option value="安静内向">安静内向</option>
+                            <option value="聪明机智">聪明机智</option>
+                            <option value="调皮可爱">调皮可爱</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">陪伴模式</label>
+                        <select class="form-select" id="dollMode">
+                            <option value="">选择陪伴模式</option>
+                            <option value="日常陪伴">日常陪伴</option>
+                            <option value="学习助手">学习助手</option>
+                            <option value="睡眠陪伴">睡眠陪伴</option>
+                            <option value="游戏伙伴">游戏伙伴</option>
+                            <option value="情绪支持">情绪支持</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">特别设定（可选）</label>
+                        <textarea class="form-textarea" id="dollSpecial" placeholder="可以描述你希望玩偶具备的特殊能力或习惯"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">声音设定</label>
+                        <select class="form-select" id="dollVoice">
+                            <option value="">选择声音类型</option>
+                            <option value="温柔甜美">温柔甜美</option>
+                            <option value="活泼可爱">活泼可爱</option>
+                            <option value="成熟稳重">成熟稳重</option>
+                            <option value="俏皮幽默">俏皮幽默</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="modal-buttons">
+                    <button class="btn-cancel" id="cancelBtn">取消</button>
+                    <button class="btn-confirm" id="confirmBtn">确认定制</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const track = document.getElementById("track");
+        const container = document.getElementById("carouselContainer");
+        const cards = document.querySelectorAll(".card");
+        const leftBtn = document.getElementById("leftBtn");
+        const rightBtn = document.getElementById("rightBtn");
+        const selectBtn = document.getElementById("selectBtn");
+        const customModal = document.getElementById("customModal");
+        const modalImage = document.getElementById("modalImage");
+        const closeBtn = document.getElementById("closeBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const confirmBtn = document.getElementById("confirmBtn");
+
+        const CONFIG = {
+            cardWidth: 330,
+            cardGap: 60,
+            maxIndex: 5,
+            dragThreshold: 80
+        };
+
+        let index = 0;
+        let isDragging = false, startX = 0, dragX = 0;
+        let selectedDollIndex = 0;
+
+        function updateCarousel() {
+            const offset = -index * (CONFIG.cardWidth + CONFIG.cardGap);
+            track.style.transform = `translateX(${offset}px)`;
+
+            cards.forEach((card, i) => {
+                card.classList.toggle("active", i === index);
+            });
+
+            leftBtn.disabled = index === 0;
+            rightBtn.disabled = index === CONFIG.maxIndex;
+            selectedDollIndex = index;
+        }
+
+        leftBtn.onclick = () => { if (index > 0) { index--; updateCarousel(); } };
+        rightBtn.onclick = () => { if (index < CONFIG.maxIndex) { index++; updateCarousel(); } };
+
+        cards.forEach((card, i) => {
+            card.onclick = () => { index = i; updateCarousel(); };
+        });
+
+        // 核心修改 1: 正确获取图片
+        selectBtn.onclick = () => {
+            const selectedCard = cards[selectedDollIndex];
+            const selectedImage = selectedCard.querySelector('img');
+            if (selectedImage) {
+                // 确保弹窗里的图片源和选中卡片的一致
+                modalImage.src = selectedImage.src;
+            }
+            customModal.classList.add('active');
+        };
+
+        function closeModal() { customModal.classList.remove('active'); }
+        closeBtn.onclick = closeModal;
+        cancelBtn.onclick = closeModal;
+
+        // 核心修改 2: 确认按钮 -> 保存数据并跳转
+        confirmBtn.onclick = () => {
+            const dollName = document.getElementById('dollName').value;
+            const dollPersonality = document.getElementById('dollPersonality').value;
+            const dollMode = document.getElementById('dollMode').value;
+            const dollSpecial = document.getElementById('dollSpecial').value;
+
+            if (!dollName || !dollPersonality || !dollMode) {
+                alert('请填写完整的玩偶信息！');
+                return;
+            }
+
+            // 1. 构建数据对象 (包含选中的图片索引)
+            const customData = {
+                name: dollName,
+                personality: dollPersonality,
+                mode: dollMode,
+                special: dollSpecial,
+                imageIndex: selectedDollIndex // 关键：传给 main.html 告诉它加载哪个模型
+            };
+
+            // 2. 保存到本地存储
+            localStorage.setItem('customDollData', JSON.stringify(customData));
+
+            // 3. 改变按钮状态反馈
+            confirmBtn.innerText = "正在启动系统...";
+            confirmBtn.style.opacity = "0.7";
+            
+            // 4. 延迟跳转到主页面
+            setTimeout(() => {
+                window.location.href = 'main.html';
+            }, 800);
+        };
+
+        // 拖动逻辑
+        container.addEventListener("mousedown", e => { isDragging = true; startX = e.clientX; track.style.transition = "none"; container.style.cursor = 'grabbing'; });
+        container.addEventListener("mousemove", e => { if (!isDragging) return; dragX = e.clientX - startX; const base = -index * (CONFIG.cardWidth + CONFIG.cardGap); track.style.transform = `translateX(${base + dragX}px)`; });
+        function endDrag() { if (!isDragging) return; isDragging = false; track.style.transition = "transform .9s cubic-bezier(.25,.46,.45,.94)"; container.style.cursor = 'grab'; if (dragX < -CONFIG.dragThreshold && index < CONFIG.maxIndex) index++; else if (dragX > CONFIG.dragThreshold && index > 0) index--; dragX = 0; updateCarousel(); }
+        container.addEventListener("mouseup", endDrag);
+        container.addEventListener("mouseleave", endDrag);
+        container.addEventListener("wheel", e => { e.preventDefault(); if (e.deltaX > 40 && index < CONFIG.maxIndex) index++; if (e.deltaX < -40 && index > 0) index--; updateCarousel(); }, { passive: false });
+
+        updateCarousel();
+
+        customModal.addEventListener('click', (e) => { if (e.target === customModal) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && customModal.classList.contains('active')) closeModal(); });
+        
+        document.querySelectorAll('.card img').forEach(img => { img.onerror = function() { console.log('图片加载失败:', this.src); }; });
+    </script>
+</body>
+</html>

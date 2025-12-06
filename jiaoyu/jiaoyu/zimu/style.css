@@ -1,0 +1,293 @@
+/* 全局样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f0f8ff;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #ff6b6b;
+    font-size: 2.5rem;
+}
+
+h2 {
+    color: #4ecdc4;
+    font-size: 2rem;
+}
+
+/* 导航按钮样式 */
+.nav-buttons button {
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 25px;
+    background-color: #4ecdc4;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.nav-buttons button:hover {
+    background-color: #3dbbaf;
+}
+
+/* 内容区域样式 */
+.content-section {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 网格布局样式 */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 动物卡片样式 */
+.animal-card {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-align: center;
+    height: auto;
+    min-height: 280px;
+}
+
+.animal-card:hover {
+    transform: scale(1.05);
+}
+
+.animal-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 5px;
+    display: block;
+    margin: 0 auto;
+    background-color: #f0f0f0;
+}
+
+.animal-card .word {
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-top: 12px;
+    color: #555;
+}
+
+.animal-card .word.clicked {
+    color: #ff6b6b;
+    font-size: 1.4rem;
+}
+
+/* 字母卡片样式 */
+.letter-card {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background-color: #ffd166;
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+}
+
+.letter-card:hover {
+    background-color: #ffbe0b;
+    transform: scale(1.05);
+}
+
+/* 当前字母显示区域 */
+#current-letter-display {
+    margin-top: 30px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #ff6b6b;
+    height: 60px;
+}
+
+/* 成功消息样式 */
+.success-message {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 10px;
+    display: none;
+}
+
+.success-message button {
+    font-size: 1rem;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* 隐藏元素的类 */
+.hidden {
+    display: none;
+}
+
+/* --- 单词匹配游戏样式 --- */
+.match-game-container {
+    position: relative;
+    min-height: 500px;
+    margin-top: 20px;
+}
+
+#word-pool {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background-color: #e9f7ef;
+    border-radius: 10px;
+    margin-bottom: 80px;
+}
+
+.word-drag {
+    padding: 12px 20px;
+    background-color: #ffd166;
+    color: #333;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.word-drag:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+#image-area {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.match-image-container {
+    text-align: center;
+    cursor: pointer;
+}
+
+.match-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+}
+
+.match-image:hover {
+    transform: scale(1.05);
+}
+
+.match-image-name {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* SVG 连线层 */
+#connection-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.connection-line {
+    stroke-width: 5;
+    stroke-dasharray: 5;
+    animation: dash 0.5s linear forwards;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.correct-line {
+    stroke: #28a745;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+}
+
+.incorrect-line {
+    stroke: #dc3545;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+}
+
+/* --- 成功动画样式 --- */
+@keyframes successBounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-30px);}
+    60% {transform: translateY(-15px);}
+}
+
+.success-animation {
+    animation: successBounce 1s;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.congrats-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(40, 167, 69, 0.95);
+    color: white;
+    padding: 30px 50px;
+    border-radius: 15px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    animation: fadeInScale 0.5s forwards;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}

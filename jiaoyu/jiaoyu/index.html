@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴伴教育中心</title>
+    <style>
+        /* 深色科技风基础样式 */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #02030a; /* 更深的备用背景 */
+            color: #e0e0ff; /* 柔和的浅紫白，替代刺眼的白色 */
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: url('../textures/planet.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        /* 加深玻璃面板底色，降低亮度 */
+        .glass-panel {
+            background: rgba(10, 12, 28, 0.9); /* 更深的面板背景 */
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(138, 107, 201, 0.4);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #a88fe8; /* 更柔和的紫白色标题 */
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-shadow: 0 0 12px rgba(138, 107, 201, 0.6);
+        }
+        .edu-module-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        /* 加深卡片底色，降低亮度 */
+        .edu-module-card {
+            background: rgba(255,255,255,0.03); /* 更浅的透明卡片 */
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(138, 107, 201, 0.2);
+        }
+        .edu-module-card:hover {
+            background: rgba(138, 107, 201, 0.25);
+            transform: translateY(-5px);
+            border-color: rgba(138, 107, 201, 0.6);
+            box-shadow: 0 10px 20px rgba(138, 107, 201, 0.2);
+        }
+        .module-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #8a6bc9; /* 主色调图标 */
+            text-shadow: 0 0 8px rgba(138, 107, 201, 0.5);
+        }
+        .edu-module-card h3 {
+            color: #d0c0ff; /* 柔和的卡片标题色 */
+            margin: 10px 0;
+        }
+        .edu-module-card p {
+            color: #a0a0d0; /* 更淡的描述文字色 */
+            font-size: 0.9rem;
+        }
+        /* 按钮风格优化 */
+        .back-btn {
+            background: linear-gradient(135deg, #6a4bb9, #4a7dd6); /* 更深的渐变 */
+            border: none;
+            color: #f0f0ff;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(138, 107, 201, 0.4);
+            transition: transform 0.2s ease;
+        }
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(138, 107, 201, 0.5);
+            background: linear-gradient(135deg, #8a6bc9, #5a8de6);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-panel">
+        <h1>📚 伴伴教育中心</h1>
+        <p>选择你想学习/游玩的内容：</p>
+        
+        <div class="edu-module-list">
+            <!-- 认字模块 -->
+            <div class="edu-module-card" onclick="window.location.href='./renzi/shizi.html'">
+                <div class="module-icon">🧍</div>
+                <h3>认字学习</h3>
+                <p>轻松认识汉字</p>
+            </div>
+            <!-- 拼音模块 -->
+            <div class="edu-module-card" onclick="window.location.href='./zimu/index.html'">
+                <div class="module-icon">🔤</div>
+                <h3>拼音学习</h3>
+                <p>趣味掌握拼音</p>
+            </div>
+            <!-- 魔法果园模块 -->
+            <div class="edu-module-card" onclick="window.location.href='./magic-orchard-dynamic/index.html'">
+                <div class="module-icon">🍎</div>
+                <h3>魔法果园</h3>
+                <p>互动学习游戏</p>
+            </div>
+            <!-- 新增：贪吃蛇模块 -->
+            <div class="edu-module-card" onclick="window.location.href='./tanchishe/index.html'">
+                <div class="module-icon">🐍</div>
+                <h3>贪吃蛇游戏</h3>
+                <p>趣味互动小游戏</p>
+            </div>
+        </div>
+        
+        <button class="back-btn" onclick="window.location.href='../index.html'">返回主页面</button>
+    </div>
+</body>
+</html>

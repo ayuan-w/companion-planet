@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: '微软雅黑', sans-serif;
+            background: url("./textures/planet.jpg") no-repeat center center fixed;
+            background-size: cover;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+
+            /* 背景暗层，看起来更柔和 */
+            position: relative;
+        }
+
+        /* 半透明黑色遮罩 */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(3px);
+            z-index: 1;
+        }
+
+        .profile-container {
+            position: relative;
+            z-index: 2;
+
+            width: 90%;
+            max-width: 500px;
+            padding: 28px;
+
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.35);
+
+            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+            color: #fff;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .radio-options label {
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.25s;
+        }
+
+        .radio-options label:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .radio-options input[type="radio"] {
+            display: none;
+        }
+
+        .radio-options input[type="radio"]:checked + label {
+            background: #00eaff;
+            color: #111;
+            border-color: white;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0,255,255,0.8);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            width: 48%;
+            padding: 12px 0;
+            border: none;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        #backBtn {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        #backBtn:hover {
+            background: rgba(255,255,255,0.45);
+        }
+
+        #saveBtn {
+            background: #00eaff;
+            color: #111;
+            box-shadow: 0 0 10px rgba(0,255,255,0.8);
+        }
+
+        #saveBtn:hover {
+            background: #33f2ff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-container">
+        <h2>个人中心</h2>
+        <p>设置你的信息，伴伴会更懂你</p>
+
+        <div class="form-group">
+            <label>请选择你的年龄阶段：</label>
+            <div class="radio-options" id="stage-group">
+                <input type="radio" id="stage_kindergarten" name="stage" value="kindergarten">
+                <label for="stage_kindergarten">幼儿园 (2-5岁)</label>
+                
+                <input type="radio" id="stage_elementary" name="stage" value="elementary">
+                <label for="stage_elementary">小学 (6-8岁)</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>请选择你的偏好：</label>
+            <div class="radio-options" id="gender-group">
+                <input type="radio" id="gender_boy" name="gender" value="boy">
+                <label for="gender_boy">男孩 👦</label>
+                
+                <input type="radio" id="gender_girl" name="gender" value="girl">
+                <label for="gender_girl">女孩 👧</label>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="backBtn" class="btn">返回</button>
+            <button id="saveBtn" class="btn">保存信息</button>
+        </div>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>

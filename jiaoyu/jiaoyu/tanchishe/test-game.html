@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试贪吃蛇游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>贪吃蛇游戏功能测试</h1>
+    
+    <div class="test-result success">
+        <h3>✅ 已修复的问题：</h3>
+        <ul>
+            <li>修复了 <code>drawFoods()</code> 函数，现在可以正确显示多个文字食物</li>
+            <li>优化了游戏循环的定时器管理，防止多个定时器同时运行</li>
+            <li>确保了 <code>gameState.foods</code> 数组被正确初始化和使用</li>
+        </ul>
+    </div>
+
+    <h3>游戏测试：</h3>
+    <p>请在下方的游戏窗口中测试以下功能：</p>
+    <ol>
+        <li>点击 "START" 按钮开始游戏</li>
+        <li>检查是否有多个带文字的食物显示在屏幕上</li>
+        <li>使用方向键控制蛇移动</li>
+        <li>尝试吃到绿色的目标食物（应该加分并生成新食物）</li>
+        <li>尝试吃到红色的干扰食物（应该扣分并缩短蛇身）</li>
+        <li>检查游戏是否能正常结束（撞到边界或自身）</li>
+        <li>测试 "RESTART" 按钮是否能正确重置游戏</li>
+    </ol>
+
+    <iframe src="index.html"></iframe>
+
+    <div class="test-result success">
+        <h3>🎮 游戏功能说明：</h3>
+        <ul>
+            <li><strong>目标食物</strong>：绿色，显示目标文字，吃到加10分</li>
+            <li><strong>干扰食物</strong>：红色，显示其他文字，吃到扣5分并缩短蛇身</li>
+            <li><strong>语音播报</strong>：游戏开始和生成新目标食物时会播报目标文字</li>
+            <li><strong>视觉效果</strong>：复古像素风格，带有半调图案和爆炸特效</li>
+        </ul>
+    </div>
+</body>
+</html>

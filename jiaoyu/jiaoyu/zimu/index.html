@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童英语启蒙乐园</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>儿童英语启蒙乐园</h1>
+
+    <div class="nav-buttons">
+        <button id="btn-animals">动物乐园</button>
+        <button id="btn-letters">字母认知</button>
+        <button id="btn-match">单词匹配</button>
+    </div>
+
+    <div id="animal-section" class="content-section">
+        <h2>动物乐园认单词</h2>
+        <div id="animal-grid" class="grid"></div>
+        <div id="animal-success" class="success-message">
+            <p>太棒了！你认识了所有的小动物！</p>
+            <button id="btn-reset-animals">再玩一次</button>
+        </div>
+    </div>
+
+    <div id="letter-section" class="content-section hidden">
+        <h2>认识英文字母</h2>
+        <div id="letter-grid" class="grid"></div>
+        <div id="current-letter-display">
+            点击下面的字母开始学习
+        </div>
+    </div>
+
+    <div id="match-section" class="content-section hidden">
+        <h2>单词图片匹配</h2>
+        <p>把上面的单词拖到下面对应的图片上！</p>
+        
+        <div class="match-game-container">
+            <div id="word-pool"></div>
+            <div id="image-area"></div>
+            <svg id="connection-layer"></svg>
+        </div>
+
+        <div id="match-success" class="success-message">
+            <p>太棒了！全部匹配正确！</p>
+            <button id="btn-reset-match">再玩一次</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

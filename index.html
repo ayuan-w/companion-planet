@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴伴星球 - Companion Planet</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #060614;
+            font-family: 'Microsoft YaHei', sans-serif;
+
+            /* 星空星球背景 */
+            background-image: url('./textures/planet.jpg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        /* --- 3D 画布容器 --- */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* --- UI 层 --- */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* ——— 标题区 ——— */
+        .header {
+            position: absolute;
+            top: 11%;
+            width: 100%;
+            text-align: center;
+        }
+
+        .title-main {
+            font-size: 4.2rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 10px;
+            margin: 0;
+            text-shadow: 0 0 50px rgba(0, 0, 0, 1);
+            opacity: 0;
+            animation: fadeIn 1.6s ease-out forwards;
+        }
+
+        .title-sub {
+            font-size: 1.3rem;
+            color: #e6e6e6;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ——— 左右介绍文字 ——— */
+        .side-text {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+            opacity: 0;
+            pointer-events: none;
+            text-shadow: 0 0 18px rgba(0, 0, 0, 0.8);
+        }
+
+        .side-text h2 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .side-text p {
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            opacity: 0.92;
+        }
+
+        .text-left {
+            left: 6%;
+            text-align: left;
+            animation: fadeUp 2s ease-out forwards;
+            animation-delay: 0.5s;
+        }
+
+        .text-right {
+            right: 6%;
+            text-align: right;
+            animation: fadeUp 2s ease-out forwards;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translate(-20px, -45%); }
+            to   { opacity: 1; transform: translate(0, -50%); }
+        }
+
+        /* ——— 探索按钮（底部） ——— */
+        .footer {
+            position: absolute;
+            bottom: 9%;
+            width: 100%;
+            text-align: center;
+            pointer-events: auto;
+        }
+
+        .explore-btn {
+            display: inline-block;
+            padding: 16px 70px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffffffee;
+            text-decoration: none;
+
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 60px;
+
+            backdrop-filter: blur(8px);
+            transition: 0.35s ease;
+            letter-spacing: 3px;
+
+            box-shadow: 0 0 30px rgba(0,0,0,0.65);
+        }
+
+        .explore-btn:hover {
+            background: rgba(255,255,255,0.9);
+            color: #111;
+            transform: scale(1.07);
+            box-shadow: 0 0 45px rgba(255,255,255,0.9);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="header">
+            <h1 class="title-main">伴伴星球</h1>
+            <div class="title-sub">Companion Planet</div>
+        </div>
+
+        <div class="side-text text-left">
+            <h2>情感共鸣</h2>
+            <p>懂你的 才是真陪伴</p>
+        </div>
+
+        <div class="side-text text-right">
+            <h2>自主进化</h2>
+            <p>每一次互动 都在成长</p>
+        </div>
+
+        <div class="footer">
+            <a href="login.html" class="explore-btn">开启探索</a>
+        </div>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+</body>
+</html>

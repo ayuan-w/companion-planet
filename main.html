@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴伴星球 - 智能体控制台</title>
+    <style>
+        /* 修复核心：让根元素满屏，确保背景能铺满 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* 关键：根元素高度满屏 */
+            overflow: hidden;
+            background-color: #050510;
+            font-family: 'Microsoft YaHei', sans-serif;
+            /* 优化背景：添加 fixed 固定定位，确保铺满且不滚动 */
+            background: url('./textures/planet.jpg') no-repeat center center fixed;
+            background-size: cover; /* 强制覆盖整个视口 */
+            color: white;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            /* 可选：添加半透明黑色遮罩，让背景更柔和，3D 模型更突出 */
+            /* background: rgba(5, 5, 16, 0.3); */
+        }
+
+        /* UI HUD 层 */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none; /* 让鼠标穿透 UI 操作 3D 模型 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 通用玻璃面板样式 */
+        .glass-panel {
+            background: rgba(16, 20, 40, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(138, 107, 201, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            pointer-events: auto; /* 恢复面板内的点击 */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部状态栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .user-info h2 { margin: 0; font-size: 1.2rem; color: #fff; }
+        .user-info span { font-size: 0.8rem; color: #aaddff; }
+
+        .system-status {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+        .status-item { display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88;}
+        .status-dot.busy { background: #ffaa00; box-shadow: 0 0 10px #ffaa00;}
+
+        /* 中间布局 */
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+            margin-top: 20px;
+        }
+
+        /* 左侧：硬件与感知 */
+        .left-panel {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .sensor-box {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        .sensor-icon { font-size: 1.5rem; margin-bottom: 5px; display: block;}
+
+        .emotion-core {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .emotion-label { font-size: 2rem; }
+        .emotion-text { color: #8a6bc9; font-weight: bold; margin-top: 5px; }
+
+        /* 右侧：任务与对话 */
+        .right-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-window {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column; /* 修复聊天消息对齐问题 */
+        }
+        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; max-width: 90%; }
+        .msg.ai { background: rgba(138, 107, 201, 0.2); border-left: 3px solid #8a6bc9; align-self: flex-start; }
+        .msg.user { background: rgba(255, 255, 255, 0.1); align-self: flex-end; margin-left: auto; text-align: right;}
+
+        /* 底部：交互控制 */
+        .bottom-control {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .mic-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8a6bc9, #5a8de6);
+            border: 2px solid rgba(255,255,255,0.5);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(138, 107, 201, 0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: pulse 2s infinite;
+        }
+        
+        .mic-btn:active { transform: scale(0.95); }
+
+        .input-group {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .main-input {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            padding: 12px 20px;
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+        .main-input:focus { outline: none; border-color: #8a6bc9; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(138, 107, 201, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(138, 107, 201, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(138, 107, 201, 0); }
+        }
+        
+        /* 模拟硬件连接线装饰 */
+        .hud-line {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            z-index: -1;
+        }
+        /* 新增的小按钮样式 */
+        .glass-btn-small {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #aaddff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .glass-btn-small:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        /* --- 个人中心和知识库样式 --- */
+        
+        #profileBtn {
+            position: absolute; 
+            top: 20px;
+            left: 20px; 
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            pointer-events: auto; 
+            z-index: 100; 
+        }
+
+        #knowledgeTip {
+            position: absolute; 
+            bottom: 100px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        
+        <a id="profileBtn" href="profile.html">
+            个人
+            中心
+        </a>
+        
+        <div class="top-bar glass-panel">
+            <div class="user-info">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h2 id="displayDollName" style="margin-left: 60px;">加载中...</h2> 
+                    <button id="switchBtn" class="glass-btn-small">⇄ 切换伴伴</button>
+                    <!-- 新增：教育、乐园按钮 -->
+                    <button id="btn-edu" class="glass-btn-small">📚 教育</button>
+                    <button id="btn-game" class="glass-btn-small">🎮 乐园</button>
+                </div>
+                <span id="displayDollPersonality" style="display:block; margin-top:5px; margin-left: 60px;">正在初始化智能体人格...</span>
+            </div>
+
+            <div class="system-status">
+                <div class="status-item"><div class="status-dot"></div> 云端大脑: 在线</div>
+                <div class="status-item"><div class="status-dot busy"></div> 本地算力: 45%</div>
+                <div class="status-item">🔋 82%</div>
+                <div class="status-item">📶 5G</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel glass-panel">
+                <div style="font-size: 0.9rem; color: #bbb; margin-bottom: 10px;">硬件感知 & 执行</div>
+                <div class="sensor-grid">
+                    <div class="sensor-box"><span class="sensor-icon">📷</span><div>视觉: 开启</div></div>
+                    <div class="sensor-box"><span class="sensor-icon">🎙️</span><div>听觉: 监听中</div></div>
+                    <div class="sensor-box"><span class="sensor-icon">⚙️</span><div>舵机: 待机</div></div>
+                    <div class="sensor-box"><span class="sensor-icon">💡</span><div>灯光: 呼吸</div></div>
+                </div>
+                <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <div style="font-size: 0.9rem; color: #bbb;">情感计算引擎</div>
+                    <div class="emotion-core">
+                        <div class="emotion-label">😊</div>
+                        <div class="emotion-text">状态: 开心 / 期待</div>
+                        <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">根据您的声音语调分析</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel glass-panel">
+                <div style="font-size: 0.9rem; color: #bbb; margin-bottom: 10px;">思维链 & 交互</div>
+                <div class="chat-window" id="chatWindow">
+                    <div class="msg ai">你好呀！我是你的专属智能体。我已经准备好陪伴你了，我们可以聊聊天，或者一起学习新知识！</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; font-size: 0.8rem;">
+                    <span style="color: #00ff88;">●</span> 当前任务: 闲聊模式 (待命)
+                </div>
+            </div>
+        </div>
+
+        <div id="knowledgeTip">
+            正在加载今日小知识...
+        </div>
+
+        <div class="bottom-control">
+            <button class="mic-btn">🎤</button>
+            <div class="input-group glass-panel" style="padding: 10px;">
+                <input type="text" class="main-input" placeholder="输入文字与智能体交流...">
+            </div>
+        </div>
+        
+    </div> 
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

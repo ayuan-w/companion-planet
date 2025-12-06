@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试背景移除</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+  <div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold text-center mb-8">测试背景移除</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">文件检查结果：</h2>
+      
+      <div class="space-y-4">
+        <div class="p-3 bg-green-50 rounded">
+          <h3 class="font-semibold text-green-700">✓ index.html</h3>
+          <ul class="list-disc list-inside mt-1 text-sm">
+            <li>背景画布元素已移除</li>
+            <li>游戏画布背景已恢复为 bg-dark</li>
+            <li>背景绘制相关JavaScript代码已移除</li>
+          </ul>
+        </div>
+        
+        <div class="p-3 bg-green-50 rounded">
+          <h3 class="font-semibold text-green-700">✓ final-test.html</h3>
+          <ul class="list-disc list-inside mt-1 text-sm">
+            <li>背景画布元素已移除</li>
+            <li>游戏画布背景已恢复为 bg-gray-900</li>
+            <li>背景绘制相关JavaScript代码已移除</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="mt-6 p-4 bg-gray-50 rounded">
+        <h3 class="font-semibold mb-2">验证步骤：</h3>
+        <ol class="list-decimal list-inside space-y-2 text-sm">
+          <li>打开 <code>index.html</code> 或 <code>final-test.html</code></li>
+          <li>确认游戏背景为纯色，没有随机像素点</li>
+          <li>检查游戏是否正常运行</li>
+        </ol>
+      </div>
+      
+      <div class="mt-6 text-center">
+        <a href="index.html" class="inline-block px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+          <i class="fa fa-gamepad mr-2"></i>打开游戏
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

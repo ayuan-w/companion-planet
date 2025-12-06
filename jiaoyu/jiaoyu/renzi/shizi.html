@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝宝识字乐园</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #4ecdc4;
+            font-size: 2rem;
+        }
+
+        /* 导航按钮样式 */
+        .nav-buttons button {
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 25px;
+            background-color: #4ecdc4;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-buttons button:hover {
+            background-color: #3dbbaf;
+        }
+
+        /* 内容区域样式 */
+        .content-section {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 网格布局样式 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* 汉字卡片样式 */
+        .char-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: center;
+            height: auto;
+            min-height: 280px;
+        }
+
+        .char-card:hover {
+            transform: scale(1.05);
+        }
+
+        .char-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+            background-color: #f0f0f0;
+        }
+
+        .char-card .chinese-char {
+            font-weight: bold;
+            font-size: 2.5rem;
+            margin-top: 12px;
+            color: #555;
+        }
+
+        .char-card .pinyin {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .char-card .chinese-char.clicked {
+            color: #ff6b6b;
+            font-size: 2.7rem;
+        }
+
+        /* 当前汉字显示区域 */
+        #current-char-display {
+            margin-top: 30px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            height: 60px;
+        }
+
+        /* 成功消息样式 */
+        .success-message {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .success-message button {
+            font-size: 1rem;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* 隐藏元素的类 */
+        .hidden {
+            display: none;
+        }
+
+        /* --- 汉字匹配游戏样式 --- */
+        .match-game-container {
+            position: relative;
+            min-height: 500px;
+            margin-top: 20px;
+        }
+
+        #char-pool {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background-color: #e9f7ef;
+            border-radius: 10px;
+            margin-bottom: 80px;
+        }
+
+        .char-drag {
+            padding: 12px 20px;
+            background-color: #ffd166;
+            color: #333;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.8rem;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .char-drag:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        #image-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .match-image-container {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .match-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+
+        .match-image:hover {
+            transform: scale(1.05);
+        }
+
+        .match-image-name {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.2rem;
+        }
+
+        /* SVG 连线层 */
+        #connection-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .connection-line {
+            stroke-width: 5;
+            stroke-dasharray: 5;
+            animation: dash 0.5s linear forwards;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .correct-line {
+            stroke: #28a745;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+
+        .incorrect-line {
+            stroke: #dc3545;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+        }
+
+        /* --- 成功动画样式 --- */
+        @keyframes successBounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-30px);}
+            60% {transform: translateY(-15px);}
+        }
+
+        .success-animation {
+            animation: successBounce 1s;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .congrats-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(40, 167, 69, 0.95);
+            color: white;
+            padding: 30px 50px;
+            border-radius: 15px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            animation: fadeInScale 0.5s forwards;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>宝宝识字乐园</h1>
+
+    <div class="nav-buttons">
+        <button id="btn-animals">动物识字</button>
+        <button id="btn-nature">自然万物</button>
+        <button id="btn-match">汉字配对</button>
+    </div>
+
+    <div id="animal-section" class="content-section">
+        <h2>认识动物汉字</h2>
+        <div id="animal-grid" class="grid"></div>
+        <div id="animal-success" class="success-message">
+            <p>太棒了！你认识了所有的动物汉字！</p>
+            <button id="btn-reset-animals">再玩一次</button>
+        </div>
+    </div>
+
+    <div id="nature-section" class="content-section hidden">
+        <h2>认识自然汉字</h2>
+        <div id="nature-grid" class="grid"></div>
+        <div id="current-char-display">
+            点击下面的汉字开始学习
+        </div>
+    </div>
+
+    <div id="match-section" class="content-section hidden">
+        <h2>汉字图片配对</h2>
+        <p>把上面的汉字拖到下面对应的图片上！</p>
+        
+        <div class="match-game-container">
+            <div id="char-pool"></div>
+            <div id="image-area"></div>
+            <svg id="connection-layer"></svg>
+        </div>
+
+        <div id="match-success" class="success-message">
+            <p>太棒了！全部匹配正确！</p>
+            <button id="btn-reset-match">再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        // 等待整个 HTML 文档加载完毕后再执行
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 全局变量和 DOM 元素 ---
+            const animalSection = document.getElementById('animal-section');
+            const natureSection = document.getElementById('nature-section');
+            const matchSection = document.getElementById('match-section');
+            const btnAnimals = document.getElementById('btn-animals');
+            const btnNature = document.getElementById('btn-nature');
+            const btnMatch = document.getElementById('btn-match');
+            const animalGrid = document.getElementById('animal-grid');
+            const natureGrid = document.getElementById('nature-grid');
+            const animalSuccessMsg = document.getElementById('animal-success');
+            const btnResetAnimals = document.getElementById('btn-reset-animals');
+            const currentCharDisplay = document.getElementById('current-char-display');
+            const charPool = document.getElementById('char-pool');
+            const imageArea = document.getElementById('image-area');
+            const matchSuccessMsg = document.getElementById('match-success');
+            const btnResetMatch = document.getElementById('btn-reset-match');
+            const connectionLayer = document.getElementById('connection-layer');
+
+            let draggedCharElement = null;
+            let currentSpeech = null;
+            let correctConnections = new Set();
+
+            // 动物汉字数据 - 对应你的图片资源
+            const animals = [
+                { name: '猫', pinyin: 'māo', image: 'tupian/cat.jpg' },
+                { name: '狗', pinyin: 'gǒu', image: 'tupian/dog.jpeg' },
+                { name: '鸟', pinyin: 'niǎo', image: 'tupian/bird.jpeg' },
+                { name: '鱼', pinyin: 'yú', image: 'tupian/fish.jpeg' },
+                { name: '兔', pinyin: 'tù', image: 'tupian/rabbit.jpeg' },
+                { name: '鸭', pinyin: 'yā', image: 'tupian/duck.jpeg' },
+                { name: '马', pinyin: 'mǎ', image: 'tupian/ma.jpeg' },
+                { name: '牛', pinyin: 'niú', image: 'tupian/niu.jpeg' }
+            ];
+
+            // 自然万物汉字数据 - 对应你的图片资源
+            const natureThings = [
+                { name: '菜', pinyin: 'cài', image: 'tupian/cai.jpeg' },
+                { name: '草', pinyin: 'cǎo', image: 'tupian/cao.jpeg' },
+                { name: '蛋', pinyin: 'dàn', image: 'tupian/dan.jpeg' },
+                { name: '风', pinyin: 'fēng', image: 'tupian/feng.png' },
+                { name: '米', pinyin: 'mǐ', image: 'tupian/mi.jpeg' },
+                { name: '面', pinyin: 'miàn', image: 'tupian/mian.jpeg' },
+                { name: '日', pinyin: 'rì', image: 'tupian/ri.jpeg' },
+                { name: '肉', pinyin: 'ròu', image: 'tupian/rou.jpeg' },
+                { name: '水', pinyin: 'shuǐ', image: 'tupian/shui.jpg' },
+                { name: '糖', pinyin: 'táng', image: 'tupian/tang.jpeg' },
+                { name: '月', pinyin: 'yuè', image: 'tupian/yue.jpeg' },
+                { name: '云', pinyin: 'yún', image: 'tupian/yun.jpg' }
+            ];
+
+            // --- 工具函数 ---
+            function speak(text) {
+                if (!('speechSynthesis' in window)) {
+                    console.warn('浏览器不支持语音合成。');
+                    return;
+                }
+                if (currentSpeech) {
+                    window.speechSynthesis.cancel(currentSpeech);
+                }
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.lang = 'zh-CN'; // 设置中文发音
+                speech.rate = 0.9;
+                speech.pitch = 1.2;
+                currentSpeech = speech;
+                speech.onend = () => { currentSpeech = null; };
+                speech.onerror = () => { currentSpeech = null; };
+                window.speechSynthesis.speak(speech);
+            }
+            
+            function clearAllConnections() {
+                while (connectionLayer.firstChild) {
+                    connectionLayer.removeChild(connectionLayer.firstChild);
+                }
+            }
+
+            function createConnection(startEl, endEl, isCorrect) {
+                const startRect = startEl.getBoundingClientRect();
+                const endRect = endEl.getBoundingClientRect();
+                const containerRect = connectionLayer.getBoundingClientRect();
+
+                const startX = startRect.left + startRect.width / 2 - containerRect.left;
+                const startY = startRect.bottom - containerRect.top;
+                const endX = endRect.left + endRect.width / 2 - containerRect.left;
+                const endY = endRect.top - containerRect.top;
+
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY);
+                line.setAttribute('x2', endX);
+                line.setAttribute('y2', endY);
+                line.classList.add('connection-line');
+                line.classList.add(isCorrect ? 'correct-line' : 'incorrect-line');
+
+                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+                marker.setAttribute('id', isCorrect ? 'correct-arrowhead' : 'incorrect-arrowhead');
+                marker.setAttribute('viewBox', '0 0 10 10');
+                marker.setAttribute('refX', '5');
+                marker.setAttribute('refY', '5');
+                marker.setAttribute('markerWidth', '6');
+                marker.setAttribute('markerHeight', '6');
+                marker.setAttribute('orient', 'auto-start-reverse');
+                
+                const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+                arrowPath.setAttribute('fill', isCorrect ? '#28a745' : '#dc3545');
+                
+                marker.appendChild(arrowPath);
+                defs.appendChild(marker);
+                connectionLayer.appendChild(defs);
+
+                line.setAttribute('marker-end', `url(#${isCorrect ? 'correct-arrowhead' : 'incorrect-arrowhead'})`);
+                connectionLayer.appendChild(line);
+
+                if (!isCorrect) {
+                    setTimeout(() => {
+                        if (line && line.parentNode) line.parentNode.removeChild(line);
+                    }, 1500);
+                }
+                
+                return line;
+            }
+            
+            function showSuccessAnimation() {
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                document.body.appendChild(backdrop);
+
+                const congratsMsg = document.createElement('div');
+                congratsMsg.className = 'congrats-message';
+                congratsMsg.textContent = '太棒了！全部正确！';
+                document.body.appendChild(congratsMsg);
+
+                speak("恭喜你！全部匹配正确！你真厉害！");
+
+                setTimeout(() => {
+                    if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+                    if (congratsMsg && congratsMsg.parentNode) congratsMsg.parentNode.removeChild(congratsMsg);
+                }, 4000);
+            }
+
+            // --- 动物识字模块 ---
+            function initAnimalGame() {
+                animalGrid.innerHTML = '';
+                animalSuccessMsg.style.display = 'none';
+                const shuffledAnimals = [...animals].sort(() => Math.random() - 0.5);
+                shuffledAnimals.forEach(animal => {
+                    const card = document.createElement('div');
+                    card.className = 'char-card';
+                    card.innerHTML = `
+                        <img src="${animal.image}" alt="${animal.name}">
+                        <div class="chinese-char">${animal.name}</div>
+                        <div class="pinyin">${animal.pinyin}</div>
+                    `;
+                    const img = card.querySelector('img');
+                    img.addEventListener('click', () => {
+                        img.style.transform = 'scale(1.1)';
+                        setTimeout(() => { img.style.transform = 'scale(1)'; }, 200);
+                        setTimeout(() => { speak(`${animal.name}，${animal.pinyin}`); }, 50);
+                    });
+                    const char = card.querySelector('.chinese-char');
+                    char.addEventListener('click', () => {
+                        if (!char.classList.contains('clicked')) {
+                            char.classList.add('clicked');
+                            checkAllAnimalsClicked();
+                        }
+                    });
+                    animalGrid.appendChild(card);
+                });
+            }
+
+            function checkAllAnimalsClicked() {
+                const allChars = document.querySelectorAll('.char-card .chinese-char');
+                const allClicked = Array.from(allChars).every(char => char.classList.contains('clicked'));
+                if (allClicked) {
+                    setTimeout(() => {
+                        animalSuccessMsg.style.display = 'block';
+                        speak('太棒了！你认识了所有的动物汉字！');
+                    }, 500);
+                }
+            }
+
+            // --- 自然万物识字模块 ---
+            function initNatureGame() {
+                natureGrid.innerHTML = '';
+                currentCharDisplay.textContent = '点击下面的汉字开始学习';
+                const shuffledNature = [...natureThings].sort(() => Math.random() - 0.5);
+                shuffledNature.forEach(thing => {
+                    const card = document.createElement('div');
+                    card.className = 'char-card';
+                    card.innerHTML = `
+                        <img src="${thing.image}" alt="${thing.name}">
+                        <div class="chinese-char">${thing.name}</div>
+                        <div class="pinyin">${thing.pinyin}</div>
+                    `;
+                    card.addEventListener('click', () => {
+                        currentCharDisplay.textContent = `${thing.name}（${thing.pinyin}）`;
+                        card.style.transform = 'scale(1.05)';
+                        setTimeout(() => { speak(`${thing.name}，${thing.pinyin}`); }, 50);
+                        setTimeout(() => { card.style.transform = 'scale(1)'; }, 300);
+                    });
+                    natureGrid.appendChild(card);
+                });
+            }
+
+            // --- 汉字匹配模块 ---
+            function initMatchGame() {
+                charPool.innerHTML = '';
+                imageArea.innerHTML = '';
+                clearAllConnections();
+                matchSuccessMsg.style.display = 'none';
+                correctConnections.clear();
+
+                // 合并动物和自然类别的数据
+                const allThings = [...animals, ...natureThings];
+                const shuffledThings = [...allThings].sort(() => Math.random() - 0.5);
+                const selectedThings = shuffledThings.slice(0, 4);
+                const charPoolThings = [...selectedThings].sort(() => Math.random() - 0.5);
+
+                selectedThings.forEach(thing => {
+                    const container = document.createElement('div');
+                    container.className = 'match-image-container';
+                    container.setAttribute('data-name', thing.name);
+                    container.innerHTML = `
+                        <img src="${thing.image}" alt="${thing.name}" class="match-image">
+                        <div class="match-image-name">${thing.name}</div>
+                    `;
+                    imageArea.appendChild(container);
+                    
+                    container.addEventListener('dragover', handleDragOver);
+                    container.addEventListener('dragleave', handleDragLeave);
+                    container.addEventListener('drop', handleDrop);
+                });
+
+                charPoolThings.forEach(thing => {
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'char-drag';
+                    charDiv.textContent = thing.name;
+                    charDiv.setAttribute('draggable', 'true');
+                    charDiv.setAttribute('data-char', thing.name);
+
+                    charDiv.addEventListener('dragstart', (e) => {
+                        draggedCharElement = e.target;
+                        e.target.style.opacity = '0.5';
+                    });
+                    
+                    charDiv.addEventListener('dragend', (e) => {
+                        e.target.style.opacity = '1';
+                        draggedCharElement = null;
+                    });
+
+                    charPool.appendChild(charDiv);
+                });
+            }
+
+            // --- 拖拽事件处理 ---
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('drag-over');
+            }
+
+            function handleDragLeave(e) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('drag-over');
+
+                if (!draggedCharElement) return;
+
+                const droppedChar = draggedCharElement.getAttribute('data-char');
+                const targetCharName = e.currentTarget.getAttribute('data-name');
+                const isCorrect = droppedChar === targetCharName;
+
+                if (correctConnections.has(targetCharName)) return;
+
+                createConnection(draggedCharElement, e.currentTarget, isCorrect);
+
+                if (isCorrect) {
+                    speak('正确！');
+                    correctConnections.add(targetCharName);
+                    e.currentTarget.style.pointerEvents = 'none';
+                    
+                    if (correctConnections.size === document.querySelectorAll('.match-image-container').length) {
+                        setTimeout(showSuccessAnimation, 500);
+                    }
+                } else {
+                    speak('再试一次。');
+                }
+            }
+
+            // --- 事件监听 ---
+            btnAnimals.addEventListener('click', () => {
+                animalSection.classList.remove('hidden');
+                natureSection.classList.add('hidden');
+                matchSection.classList.add('hidden');
+                initAnimalGame();
+            });
+
+            btnNature.addEventListener('click', () => {
+                animalSection.classList.add('hidden');
+                natureSection.classList.remove('hidden');
+                matchSection.classList.add('hidden');
+                initNatureGame();
+            });
+
+            btnMatch.addEventListener('click', () => {
+                animalSection.classList.add('hidden');
+                natureSection.classList.add('hidden');
+                matchSection.classList.remove('hidden');
+                initMatchGame();
+            });
+
+            btnResetAnimals.addEventListener('click', initAnimalGame);
+            btnResetMatch.addEventListener('click', initMatchGame);
+
+            // --- 初始化 ---
+            initAnimalGame();
+        });
+    </script>
+</body>
+</html>

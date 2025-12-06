@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试樱桃图片加载</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+  <div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold text-center mb-8">测试樱桃图片加载</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">图片直接显示</h2>
+      <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/3ec256d940fe47939fecf20644485dbc.png~tplv-a9rns2rl98-image-qvalue.image?rcl=2025091814482565B5505A781268A5106D&rk3s=8e244e95&rrcfp=b669a9d6&x-expires=1758264506&x-signature=cIcaeJhLPNaXI3K3yAWJjTj1RBc%3D(MISSING)" 
+           alt="樱桃图片" 
+           class="w-32 h-32 mx-auto mb-6">
+      
+      <h2 class="text-xl font-semibold mb-4">Canvas绘制测试</h2>
+      <canvas id="testCanvas" width="30" height="30" class="border border-gray-300 mx-auto"></canvas>
+      
+      <div class="mt-6 p-4 bg-gray-50 rounded">
+        <h3 class="font-semibold mb-2">控制台输出：</h3>
+        <div id="consoleOutput" class="text-sm font-mono whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 重定向console.log到页面
+    const consoleOutput = document.getElementById('consoleOutput');
+    const originalLog = console.log;
+    console.log = function(message) {
+      originalLog.apply(console, arguments);
+      consoleOutput.textContent += message + '\n';
+    };
+    
+    // 测试图片加载
+    const cherryImageUrl = 'https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/3ec256d940fe47939fecf20644485dbc.png~tplv-a9rns2rl98-image-qvalue.image?rcl=2025091814482565B5505A781268A5106D&rk3s=8e244e95&rrcfp=b669a9d6&x-expires=1758264506&x-signature=cIcaeJhLPNaXI3K3yAWJjTj1RBc%3D(MISSING)';
+    
+    console.log('测试开始');
+    console.log('图片URL:', cherryImageUrl);
+    
+    // 测试1: 直接创建Image对象
+    console.log('\n测试1: 直接创建Image对象');
+    const testImage1 = new Image();
+    testImage1.crossOrigin = 'Anonymous';
+    
+    testImage1.onload = function() {
+      console.log('测试1: 图片加载成功');
+      console.log('测试1: 图片宽度:', testImage1.width);
+      console.log('测试1: 图片高度:', testImage1.height);
+      
+      // 测试2: 在Canvas上绘制
+      console.log('\n测试2: 在Canvas上绘制');
+      const canvas = document.getElementById('testCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      try {
+        ctx.drawImage(testImage1, 0, 0, 30, 30);
+        console.log('测试2: 图片绘制成功');
+      } catch (error) {
+        console.error('测试2: 图片绘制失败:', error);
+      }
+    };
+    
+    testImage1.onerror = function(error) {
+      console.error('测试1: 图片加载失败:', error);
+    };
+    
+    testImage1.src = cherryImageUrl;
+    
+    // 测试3: 检查网络请求
+    console.log('\n测试3: 检查网络请求');
+    fetch(cherryImageUrl, { method: 'HEAD' })
+      .then(response => {
+        console.log('测试3: HEAD请求成功');
+        console.log('测试3: 响应状态:', response.status);
+        console.log('测试3: Content-Type:', response.headers.get('Content-Type'));
+        console.log('测试3: Content-Length:', response.headers.get('Content-Length'));
+      })
+      .catch(error => {
+        console.error('测试3: HEAD请求失败:', error);
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试最新的樱桃图片</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+  <div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold text-center mb-8">测试最新的樱桃图片</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">图片直接显示</h2>
+      <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/42ba020e55fd44dd98d8ddcfc882b6ec.png~tplv-a9rns2rl98-image-qvalue.image?rcl=2025091814571282B9F17558F2AE9C3BEC&rk3s=8e244e95&rrcfp=b669a9d6&x-expires=1758265032&x-signature=H1vJ%2F1cJOsieMUfYgZVTepHJVt0%3D" 
+           alt="最新的樱桃图片" 
+           class="w-32 h-32 mx-auto mb-6">
+      
+      <h2 class="text-xl font-semibold mb-4">Canvas绘制测试（30x30像素）</h2>
+      <canvas id="testCanvas" width="30" height="30" class="border border-gray-300 mx-auto"></canvas>
+      
+      <div class="mt-6 p-4 bg-gray-50 rounded">
+        <h3 class="font-semibold mb-2">图片信息：</h3>
+        <p>图片URL: <code class="text-sm bg-gray-200 px-1 py-0.5 rounded">https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/42ba020e55fd44dd98d8ddcfc882b6ec.png~tplv-a9rns2rl98-image-qvalue.image?rcl=2025091814571282B9F17558F2AE9C3BEC&rk3s=8e244e95&rrcfp=b669a9d6&x-expires=1758265032&x-signature=H1vJ%2F1cJOsieMUfYgZVTepHJVt0%3D</code></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 测试图片加载和Canvas绘制
+    const cherryImageUrl = 'https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/42ba020e55fd44dd98d8ddcfc882b6ec.png~tplv-a9rns2rl98-image-qvalue.image?rcl=2025091814571282B9F17558F2AE9C3BEC&rk3s=8e244e95&rrcfp=b669a9d6&x-expires=1758265032&x-signature=H1vJ%2F1cJOsieMUfYgZVTepHJVt0%3D';
+    
+    const cherryImage = new Image();
+    cherryImage.crossOrigin = 'Anonymous';
+    
+    cherryImage.onload = function() {
+      console.log('图片加载成功');
+      console.log('图片宽度:', cherryImage.width);
+      console.log('图片高度:', cherryImage.height);
+      
+      // 在Canvas上绘制（30x30像素）
+      const canvas = document.getElementById('testCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      try {
+        ctx.drawImage(cherryImage, 0, 0, 30, 30);
+        console.log('图片绘制成功');
+      } catch (error) {
+        console.error('图片绘制失败:', error);
+      }
+    };
+    
+    cherryImage.onerror = function(error) {
+      console.error('图片加载失败:', error);
+    };
+    
+    cherryImage.src = cherryImageUrl;
+  </script>
+</body>
+</html>
